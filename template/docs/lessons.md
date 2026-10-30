@@ -1,4 +1,4 @@
-﻿# Lessons
+# Lessons
 
 A living record of what works and what does not in this project.
 Claude updates this after sessions where something notable was learned via `/learn`.

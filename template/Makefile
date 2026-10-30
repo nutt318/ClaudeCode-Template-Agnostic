@@ -1,4 +1,4 @@
-﻿# Makefile — standardised commands across all stacks
+# Makefile — standardised commands across all stacks
 # Run from the project root. All commands delegate into src/.
 
 .PHONY: help setup install hooks dev build test lint format clean

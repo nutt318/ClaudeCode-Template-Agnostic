@@ -15,6 +15,17 @@ Install these once if you don't have them:
   - (The desktop app at https://claude.ai/download is an optional alternative if you'd rather not use an IDE.)
 - **GitHub CLI (`gh`)** — https://cli.github.com, then run `gh auth login` (used by `/standup`, `/create-pr`, `/fix-issue`)
 
+## Optional setup (once per machine)
+
+None of this blocks `/prime`. Set up what you need; `/prime` will tell you what's missing.
+
+| Item | Needed for | How |
+|------|-----------|-----|
+| **`GITHUB_TOKEN`** env var | The GitHub MCP server in `.mcp.json` (PRs, issues, code search from Claude) | Create a fine-grained token at https://github.com/settings/personal-access-tokens, then set it in your shell profile: `export GITHUB_TOKEN=...` (Windows: `setx GITHUB_TOKEN "..."`). Without it the GitHub MCP server fails to connect; the rest of the template is unaffected. Fully quit and reopen your IDE afterwards. |
+| **ralph-loop plugin** | `/ralph`, and autonomous mode in `/implement` and `/tdd` | `claude plugin install ralph-loop` (or run `/plugin` inside Claude Code). If it isn't found, run `claude plugin marketplace add anthropics/claude-plugins-official` first. |
+| **ECC skills** | Extra skills, agents and commands | `/prime` offers it, or follow `docs/ecc-recommended.md` |
+| **`ANTHROPIC_API_KEY`** repo secret + **Claude GitHub App** | The Claude PR-review and issue-triage workflows in `.github/workflows/` | Add the secret under the repo's *Settings → Secrets and variables → Actions*, and run `/install-github-app` in Claude Code. Skip if you don't use those workflows. |
+
 ## Get your code into `src/`
 
 Your application code lives in `src/`. With this template the **whole project — Claude config and your code — is one git repository**, pushed to GitHub/Bitbucket together (you'll connect it at the end). Set `src/` up **before** running `/prime`:
@@ -52,7 +63,7 @@ Prefer not to use an IDE? You can also run Claude Code from the **terminal** (`c
 
 Claude will ask a few quick setup questions (project name, org, team, coding standards), configure all your files, load the project context — and then, once it knows your project fully, ask what you want to build. Takes about 10 minutes.
 
-> **Optional — ECC:** During `/prime`, Claude offers to install [everything-claude-code (ECC)](https://github.com/affaan-m/everything-claude-code), a global toolkit of extra agents, skills, and hooks. It's optional — the template works fully without it. Accept the offer to install it now, or add it any time later. Most users want `ECC_HOOK_PROFILE=standard` (the default is `strict`).
+> **Optional — ECC:** During `/prime`, Claude offers to install [everything-claude-code (ECC)](https://github.com/affaan-m/everything-claude-code), a global toolkit of extra skills, agents, and commands. It's optional — the template works fully without it. Accept the offer to install a small recommended set now, or follow `docs/ecc-recommended.md` any time later.
 >
 > If you install ECC or set any environment variables, **fully quit and reopen your IDE afterwards** (not just the Claude panel) — the IDE only picks up new environment variables when it restarts.
 

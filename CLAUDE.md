@@ -1,4 +1,4 @@
-# CLAUDE.md — ClaudeCode-Template
+# CLAUDE.md — ClaudeCode-Template-Agnostic
 
 This repo contains a ready-to-copy scaffold for teams using Claude Code, with optional everything-claude-code (ECC) enhancements.
 
@@ -26,13 +26,14 @@ When editing this repo you are working on **template content**, not a live proje
 ### Key invariants
 
 - `setup.sh` and `setup.ps1` must stay in sync — every placeholder one fills, both must fill
+- `setup.sh` must run on **macOS stock bash 3.2 with BSD sed** — no `sed -i` (use the `sed_i` helper), no `${var,,}`, no `declare -A`, no `\n` in sed replacements (use `$NL`), and prompts that are captured with `$(...)` must print to stderr. Test it on a Mac, not just Linux/Git Bash
 - Placeholders in template files use `[your-thing]` format so sed/PowerShell can target them cleanly
 - The `_disabled_` prefix in `.mcp.json` is the disable convention — rename to enable, never delete
 - Slash commands are self-contained markdown; no external dependencies beyond `$ARGUMENTS`
 
 ## No Git Repo at This Level
 
-The `template/` subdirectory is not a git repository (git lives at the `ClaudeCode-Templates/` root). Running `/prime` from `template/` will skip git steps — that is expected and normal.
+The `template/` subdirectory is not a git repository (git lives at the `ClaudeCode-Template-Agnostic/` root). Running `/prime` from `template/` will skip git steps — that is expected and normal.
 
 ## Stack
 

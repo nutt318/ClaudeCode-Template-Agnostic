@@ -1,0 +1,28 @@
+# CODEOWNERS
+# Defines who is automatically requested to review PRs touching specific paths.
+# Place this file at .bitbucket/CODEOWNERS or the repo root.
+# Docs: https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/
+
+# Default owner for everything not matched below
+* @your-workspace/team-name
+
+# Claude and AI config — reviewed by whoever owns the AI tooling
+CLAUDE.md @your-workspace/team-name
+PROJECT_REF.md @your-workspace/team-name
+.claude/ @your-workspace/team-name
+.mcp.json @your-workspace/team-name
+
+# CI — reviewed by whoever owns DevOps
+bitbucket-pipelines.yml @your-workspace/devops
+
+# Security-sensitive files
+.env.example @your-workspace/team-lead
+**/auth/** @your-workspace/team-lead
+**/security/** @your-workspace/team-lead
+
+# Documentation
+docs/ @your-workspace/team-name
+*.md @your-workspace/team-name
+
+# Source code — replace with your actual structure
+src/ @your-workspace/team-name

@@ -1,0 +1,52 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Claude Code personal/local files (never commit)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+# Track shared VS Code config but ignore personal/local settings
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Test coverage
+coverage/
+.coverage
+
+# src/ git handling
+# DEFAULT (Option B): one repo — Claude config AND src/ code are tracked and pushed together.
+# src/ commits normally; nothing to do here.
+#
+# Caveat: if src/ was cloned from another repo it carries its own .git, which cannot be tracked
+# inside this repo. To fold it in, remove src/.git first (this drops the old remote/history link).
+#
+# Option A (alternative): keep src/ as its own repo with its own remote, and don't push the
+# workspace. Uncomment the next line so this repo ignores src/ entirely:
+# src/

@@ -1,4 +1,4 @@
-﻿# Issue Tracker — Agent Reference
+# Issue Tracker — Agent Reference
 
 > Exact CLI commands for every GitHub issue and PR operation in this repo.
 > Use these verbatim. Do not improvise gh syntax.

@@ -1,4 +1,4 @@
-﻿# Shell Aliases
+# Shell Aliases
 
 Add these to `~/.zshrc` or `~/.bashrc` (Mac/Linux) or your PowerShell profile (Windows) to launch Claude Code sessions faster.
 

@@ -1,4 +1,4 @@
-﻿# New Developer Onboarding Checklist
+# New Developer Onboarding Checklist
 
 Work through this on your first day. Each section should take 15–30 minutes.
 
@@ -39,12 +39,9 @@ Work through this on your first day. Each section should take 15–30 minutes.
 ## 2. Claude Code Setup
 
 - [ ] Install Claude Code — CLI (`npm install -g @anthropic-ai/claude-code`), the VS Code extension, or the desktop app (https://claude.ai/download)
-- [ ] **Optional:** install ECC (everything-claude-code) globally for extra agents, skills, and hooks — not required to use this project:
-  ```bash
-  git clone https://github.com/affaan-m/everything-claude-code.git ~/Projects/everything-claude-code
-  cd ~/Projects/everything-claude-code && ./install.sh   # or .\install.ps1 on Windows
-  ```
-- [ ] If you installed ECC, set `ECC_HOOK_PROFILE=standard` in your shell profile (most users want `standard`, not the `strict` default)
+- [ ] **Optional:** install the recommended ECC (everything-claude-code) skill set for extra skills, agents, and commands — not required to use this project. Follow `docs/ecc-recommended.md` (or let `/prime` walk you through it)
+- [ ] **Optional:** set the `GITHUB_TOKEN` env var so the GitHub MCP server can connect (create a fine-grained token at https://github.com/settings/personal-access-tokens and export it in your shell profile; without it the GitHub MCP server fails to connect). Fully quit and reopen your IDE afterwards
+- [ ] **Optional:** install the ralph-loop plugin for /ralph and autonomous mode: `claude plugin install ralph-loop`
 - [ ] Open this project in Claude Code and run `/prime`
 - [ ] Confirm Claude summarises the project correctly and your branch state is shown
 
@@ -82,7 +79,7 @@ Work through this on your first day. Each section should take 15–30 minutes.
 
 - [ ] Added to the GitHub repo with correct permissions
 - [ ] Added to team Slack/Teams channels
-- [ ] Have the `ANTHROPIC_API_KEY` secret set (ask your team lead)
+- [ ] Have the `ANTHROPIC_API_KEY` secret set (ask your team lead) and the Claude GitHub App installed on the repo (`/install-github-app`) if the Claude PR-review workflow is used
 - [ ] CI checks pass on your draft PR
 
 ---

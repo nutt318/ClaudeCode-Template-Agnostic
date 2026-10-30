@@ -1,4 +1,4 @@
-﻿# Reference
+# Reference
 
 Patterns, examples, and specs that Claude treats as the source of truth for this project.
 When Claude generates code, it checks here first to match established conventions.

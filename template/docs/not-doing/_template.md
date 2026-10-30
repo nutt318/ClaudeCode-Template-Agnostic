@@ -1,4 +1,4 @@
-﻿# [Feature or Approach Name]
+# [Feature or Approach Name]
 
 **Date decided:** YYYY-MM-DD
 **Decided by:** [Name or team]

@@ -1,4 +1,4 @@
-﻿# Triage Labels — Agent Reference
+# Triage Labels — Agent Reference
 
 > Maps generic concept names to the actual label strings used in this GitHub repo.
 > Use the "GitHub Label" column exactly when calling `gh issue edit --add-label`.

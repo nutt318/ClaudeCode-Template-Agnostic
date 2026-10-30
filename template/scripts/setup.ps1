@@ -7,6 +7,8 @@ function Header { param($text) Write-Host "`n=== $text ===" -ForegroundColor Cya
 function Ok     { param($text) Write-Host "  v $text" -ForegroundColor Green }
 function Warn   { param($text) Write-Host "  ! $text" -ForegroundColor Yellow }
 function Err    { param($text) Write-Host "  x $text" -ForegroundColor Red }
+# Escape a value for use as a -replace replacement string ($ is special there)
+function Esc { param([string]$s) $s.Replace('$', '$$') }
 
 function Read-WithDefault {
   param($promptText, $default)
@@ -155,21 +157,21 @@ if (-not $cmdBuild)   { $cmdBuild = "TBD" }
 
 # --- CLAUDE.md ---
 if (Test-Path "CLAUDE.md") {
-  $stackLines = "- **Language**: $lang"
-  if ($framework) { $stackLines += "`n- **Framework**: $framework" }
-  if ($database)  { $stackLines += "`n- **Database**: $database" }
-  $stackLines += "`n- **Package Manager**: $pkgManager"
+  $stackLines = "- **Language**: $(Esc $lang)"
+  if ($framework) { $stackLines += "`n- **Framework**: $(Esc $framework)" }
+  if ($database)  { $stackLines += "`n- **Database**: $(Esc $database)" }
+  $stackLines += "`n- **Package Manager**: $(Esc $pkgManager)"
 
   $c = Get-Content "CLAUDE.md" -Raw -Encoding utf8
-  $c = $c -replace '\[Replace with your project name and a one-paragraph description\.\]', "$projectName -- $projectDesc"
-  $c = $c -replace '- \*\*Language\*\*: \[e\.g\. TypeScript / Python / Go\]\r?\n- \*\*Framework\*\*: \[e\.g\. Next\.js / FastAPI / Gin\]\r?\n- \*\*Database\*\*: \[e\.g\. PostgreSQL / MongoDB / SQLite\]\r?\n- \*\*Package Manager\*\*: \[e\.g\. npm / pnpm / yarn / pip\]', $stackLines
-  $c = $c -replace '\[your install command\]', $cmdInstall
-  $c = $c -replace '\[your dev command\]', $cmdDev
-  $c = $c -replace '\[your test command\]', $cmdTest
-  $c = $c -replace '\[your build command\]', $cmdBuild
-  $c = $c -replace '\[your coverage command\]', "$cmdTest --coverage"
-  $c = $c -replace '\[your targeted test command\]', "$cmdTest --testPathPattern=<suite>"
-  $c = $c -replace '\[your-repo\]', $projectName
+  $c = $c -replace '\[Replace with your project name and a one-paragraph description\.\]', "$(Esc $projectName) -- $(Esc $projectDesc)"
+  $c = $c -replace '- \*\*Language\*\*: \[e\.g\. TypeScript / Python / Go\]\r?\n- \*\*Framework\*\*: \[e\.g\. Next\.js / FastAPI / Gin\]\r?\n- \*\*Database\*\*: \[e\.g\. PostgreSQL / MongoDB / SQLite\]\r?\n- \*\*Package Manager\*\*: \[e\.g\. npm / pnpm / yarn / pip\]', (Esc $stackLines)
+  $c = $c -replace '\[your install command\]', (Esc $cmdInstall)
+  $c = $c -replace '\[your dev command\]', (Esc $cmdDev)
+  $c = $c -replace '\[your test command\]', (Esc $cmdTest)
+  $c = $c -replace '\[your build command\]', (Esc $cmdBuild)
+  $c = $c -replace '\[your coverage command\]', "$(Esc $cmdTest) --coverage"
+  $c = $c -replace '\[your targeted test command\]', "$(Esc $cmdTest) --testPathPattern=<suite>"
+  $c = $c -replace '\[your-repo\]', (Esc $projectName)
   Set-Content "CLAUDE.md" -Value $c -Encoding utf8 -NoNewline
   Ok "CLAUDE.md"
 }
@@ -177,8 +179,8 @@ if (Test-Path "CLAUDE.md") {
 # --- LICENSE ---
 if (Test-Path "LICENSE") {
   $c = Get-Content "LICENSE" -Raw -Encoding utf8
-  $c = $c -replace '\[Year\]', $copyrightYear
-  $c = $c -replace '\[Your Name or Organisation\]', $orgName
+  $c = $c -replace '\[Year\]', (Esc $copyrightYear)
+  $c = $c -replace '\[Your Name or Organisation\]', (Esc $orgName)
   Set-Content "LICENSE" -Value $c -Encoding utf8 -NoNewline
   Ok "LICENSE"
 }
@@ -186,7 +188,7 @@ if (Test-Path "LICENSE") {
 # --- SECURITY.md ---
 if (Test-Path "SECURITY.md") {
   $c = Get-Content "SECURITY.md" -Raw -Encoding utf8
-  $c = $c -replace 'security@example\.com', $itContact
+  $c = $c -replace 'security@example\.com', (Esc $itContact)
   Set-Content "SECURITY.md" -Value $c -Encoding utf8 -NoNewline
   Ok "SECURITY.md"
 }
@@ -195,7 +197,7 @@ if (Test-Path "SECURITY.md") {
 if ($provider -eq "github") {
   if (Test-Path ".github\CODEOWNERS") {
     $c = Get-Content ".github\CODEOWNERS" -Raw -Encoding utf8
-    $c = $c -replace '@your-org/team-name', "@$vcTeam"
+    $c = $c -replace '@your-org/team-name', "@$(Esc $vcTeam)"
     Set-Content ".github\CODEOWNERS" -Value $c -Encoding utf8 -NoNewline
     Ok ".github/CODEOWNERS"
   }
@@ -206,7 +208,7 @@ if ($provider -eq "github") {
 } elseif ($provider -eq "bitbucket") {
   if (Test-Path ".bitbucket\CODEOWNERS") {
     $c = Get-Content ".bitbucket\CODEOWNERS" -Raw -Encoding utf8
-    $c = $c -replace '@your-workspace/team-name', "@$vcTeam"
+    $c = $c -replace '@your-workspace/team-name', "@$(Esc $vcTeam)"
     Set-Content ".bitbucket\CODEOWNERS" -Value $c -Encoding utf8 -NoNewline
     Ok ".bitbucket/CODEOWNERS"
   }
@@ -358,7 +360,7 @@ Ok "CODING_STANDARDS.md"
 # --- docs/ai/domain.md ---
 if (Test-Path "docs\ai\domain.md") {
   $c = Get-Content "docs\ai\domain.md" -Raw -Encoding utf8
-  $c = $c -replace '^# Agent Domain Guide', "# Agent Domain Guide -- $projectName"
+  $c = $c -replace '^# Agent Domain Guide', "# Agent Domain Guide -- $(Esc $projectName)"
   Set-Content "docs\ai\domain.md" -Value $c -Encoding utf8 -NoNewline
   Ok "docs/ai/domain.md"
 }
@@ -366,7 +368,10 @@ if (Test-Path "docs\ai\domain.md") {
 # --- .claude/rules/project.md ---
 if (Test-Path ".claude\rules\project.md") {
   $c = Get-Content ".claude\rules\project.md" -Raw -Encoding utf8
-  $c = $c -replace '\[Project Name\]', $projectName
+  $c = $c -replace '\[Project Name\]', (Esc $projectName)
+  if ($lang)       { $c = $c -replace '\[e\.g\. TypeScript / Python\]', (Esc $lang) }
+  if ($framework)  { $c = $c -replace '\[e\.g\. Next\.js / FastAPI\]', (Esc $framework) }
+  if ($pkgManager) { $c = $c -replace '\[e\.g\. npm / pnpm / pip\]', (Esc $pkgManager) }
   Set-Content ".claude\rules\project.md" -Value $c -Encoding utf8 -NoNewline
   Ok ".claude/rules/project.md"
 }
@@ -384,8 +389,8 @@ if ($provider -eq "bitbucket" -and (Test-Path "docs\ai\issue-tracker-bitbucket.m
   # Extract workspace from vcTeam (e.g. "my-workspace/engineering" -> "my-workspace")
   $bbWorkspace = $vcTeam -replace '/.*', ''
   $c = Get-Content "docs\ai\issue-tracker-bitbucket.md" -Raw -Encoding utf8
-  $c = $c -replace '\[bitbucket-workspace\]', $bbWorkspace
-  $c = $c -replace '\[repo-slug\]', $projectName
+  $c = $c -replace '\[bitbucket-workspace\]', (Esc $bbWorkspace)
+  $c = $c -replace '\[repo-slug\]', (Esc $projectName)
   Set-Content "docs\ai\issue-tracker.md" -Value $c -Encoding utf8 -NoNewline
   Remove-Item "docs\ai\issue-tracker-bitbucket.md" -Force
   Ok "docs/ai/issue-tracker.md (Bitbucket)"
@@ -486,8 +491,8 @@ Write-Host ""
 # ─── Windows: ralph-loop hook path warning ────────────────────────────────────
 # The plugin installs to a hashed cache path; use a wildcard to locate hooks.json
 $gitBashPath = "C:/Program Files/Git/bin/bash.exe"
-$ralphCacheBase = "$env:USERPROFILE\.claude\plugins\cache\claude-plugins-official\ralph-wiggum"
-$ralphHooksPath = Get-ChildItem "$ralphCacheBase\*\hooks\hooks.json" -ErrorAction SilentlyContinue |
+$ralphCacheBase = "$env:USERPROFILE\.claude\plugins\cache"
+$ralphHooksPath = Get-ChildItem "$ralphCacheBase\*\ralph-*\*\hooks\hooks.json" -ErrorAction SilentlyContinue |
                   Select-Object -First 1 -ExpandProperty FullName
 
 if ($ralphHooksPath) {
@@ -500,9 +505,9 @@ if ($ralphHooksPath) {
     Write-Host "  See README -- Autonomous Loops -- Windows note for details."
     Write-Host ""
   }
-} elseif (-not (Test-Path $ralphCacheBase)) {
+} elseif (-not (Get-ChildItem "$ralphCacheBase\*\ralph-*" -ErrorAction SilentlyContinue)) {
   Write-Host "Optional: install the ralph-loop plugin for autonomous iteration loops."
-  Write-Host "  In Claude Code run: /install-plugin ralph-loop"
+  Write-Host "  Run: claude plugin install ralph-loop   (or /plugin inside Claude Code)"
   Write-Host "  Then see /ralph for usage and prompt templates."
   Write-Host ""
 }

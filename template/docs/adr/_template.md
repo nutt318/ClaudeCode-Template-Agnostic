@@ -1,4 +1,4 @@
-﻿# ADR 0001: Initial Project Setup
+# ADR 0001: Initial Project Setup
 
 **Date:** [YYYY-MM-DD]
 **Status:** Accepted

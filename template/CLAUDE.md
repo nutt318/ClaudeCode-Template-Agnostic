@@ -1,4 +1,4 @@
-﻿# CLAUDE.md
+# CLAUDE.md
 
 This file provides guidance to Claude Code when working in this project.
 Read this fully at the start of every session, or run /prime.
@@ -164,7 +164,7 @@ try {
 
 ## Workflow
 
-> All commands below ship with this template and work standalone. [everything-claude-code (ECC)](https://github.com/affaan-m/everything-claude-code) is an **optional** global add-on (extra agents, skills, and hooks) — `/prime` offers to install it, but nothing in this workflow requires it.
+> All commands below ship with this template and work standalone. [everything-claude-code (ECC)](https://github.com/affaan-m/everything-claude-code) is an **optional** global add-on (extra skills, agents, and commands; see `docs/ecc-recommended.md`) — `/prime` offers to install it, but nothing in this workflow requires it.
 
 ```bash
 # Every session — always start here:
@@ -202,7 +202,7 @@ For well-defined tasks with automated verification, use `/ralph` to hand the ful
 Ralph-loop uses a Stop hook to intercept session exits and re-feed the same prompt, reading its own git history and file changes each iteration. Always set `--max-iterations` as a safety net.
 
 See `/ralph` for full usage, prompt templates, and safety rules.
-Requires: `/install-plugin ralph-loop`
+Requires the ralph-loop plugin: `claude plugin install ralph-loop` (or run `/plugin` in Claude Code). If it is not found, first run `claude plugin marketplace add anthropics/claude-plugins-official`.
 
 ---
 

@@ -1,4 +1,4 @@
-﻿# Out of Scope
+# Out of Scope
 
 This directory tracks features and approaches that were **explicitly decided against**.
 

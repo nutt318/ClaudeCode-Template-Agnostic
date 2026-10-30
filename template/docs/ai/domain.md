@@ -1,4 +1,4 @@
-﻿# Agent Domain Guide
+# Agent Domain Guide
 
 > Read this before exploring the codebase. It tells you where to look and how to communicate.
 

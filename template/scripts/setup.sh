@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # setup.sh — Interactive project setup for team-starter template
 # Run once after copying the template: bash scripts/setup.sh  OR  make setup
 
@@ -16,9 +16,20 @@ ok()     { echo -e "${GREEN}  ✓ $1${RESET}"; }
 warn()   { echo -e "${YELLOW}  ! $1${RESET}"; }
 err()    { echo -e "${RED}  ✗ $1${RESET}"; }
 
+# sed -i differs between GNU (Linux, Git Bash) and BSD (macOS): BSD needs an explicit backup suffix.
+if sed --version >/dev/null 2>&1; then
+  sed_i() { sed -i "$@"; }
+else
+  sed_i() { sed -i '' "$@"; }
+fi
+NL=$'\\\n'   # backslash + newline: a portable newline inside a sed replacement (\n is GNU-only)
+
+# Escape a value for use in a sed s|||| replacement: backslash, the | delimiter, and &.
+E() { printf '%s' "$1" | sed -e 's/[\\|&]/\\&/g'; }
+
 ask_default() {
   local msg="$1" def="$2"
-  echo -e "${YELLOW}${msg} [${def}]:${RESET}"
+  echo -e "${YELLOW}${msg} [${def}]:${RESET}" >&2   # prompt to stderr: callers capture stdout with $(...)
   read -r REPLY
   if [ -z "$REPLY" ]; then echo "$def"; else echo "$REPLY"; fi
 }
@@ -47,7 +58,7 @@ if [ -f "CLAUDE.md" ] && ! grep -q "\[Replace with your project name" "CLAUDE.md
   echo ""
   echo -e "${YELLOW}Continue anyway and overwrite existing values? [y/N]:${RESET}"
   read -r CONFIRM
-  if [ "${CONFIRM,,}" != "y" ]; then
+  if [ "$(echo "$CONFIRM" | tr '[:upper:]' '[:lower:]')" != "y" ]; then
     echo "Aborted. No changes made."
     exit 0
   fi
@@ -70,7 +81,7 @@ COPYRIGHT_YEAR=$(ask_default "Copyright year" "$(date +%Y)")
 header "2 of 6  Tech stack  (leave any blank to fill in later)"
 
 echo -e "${YELLOW}Primary language (e.g. TypeScript / Python / Go):${RESET}"
-read -r LANG
+read -r PROJECT_LANG
 echo -e "${YELLOW}Framework (e.g. Next.js / FastAPI / Gin):${RESET}"
 read -r FRAMEWORK
 echo -e "${YELLOW}Database (e.g. PostgreSQL / MongoDB):${RESET}"
@@ -101,13 +112,15 @@ echo -e "${YELLOW}Key domain terms — comma-separated (e.g. Member,Workspace,Ca
 read -r TERMS_RAW
 
 IFS=',' read -ra TERMS <<< "$TERMS_RAW"
-declare -A TERM_DEFS
+TERM_NAMES=()
+TERM_VALUES=()   # parallel arrays: bash 3.2 (macOS default) has no associative arrays
 for term in "${TERMS[@]}"; do
   term=$(echo "$term" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
   [ -z "$term" ] && continue
   echo -e "${YELLOW}Define '${term}' in one sentence:${RESET}"
   read -r def
-  TERM_DEFS["$term"]="${def:-A core concept in this project.}"
+  TERM_NAMES+=("$term")
+  TERM_VALUES+=("${def:-A core concept in this project.}")
 done
 
 echo -e "${YELLOW}Any terms to avoid or common confusions (e.g. 'account' vs 'workspace') — or leave blank:${RESET}"
@@ -158,7 +171,7 @@ fi
 echo ""
 echo -e "${BOLD}${CYAN}━━━ Writing files... ━━━${RESET}"
 
-LANG="${LANG:-TBD}"
+PROJECT_LANG="${PROJECT_LANG:-TBD}"
 PKG_MANAGER="${PKG_MANAGER:-TBD}"
 CMD_INSTALL="${CMD_INSTALL:-TBD}"
 CMD_DEV="${CMD_DEV:-TBD}"
@@ -167,47 +180,47 @@ CMD_BUILD="${CMD_BUILD:-TBD}"
 
 # --- CLAUDE.md ---
 if [ -f "CLAUDE.md" ]; then
-  STACK_LINE="- **Language**: ${LANG}"
-  [ -n "$FRAMEWORK" ] && STACK_LINE="${STACK_LINE}\n- **Framework**: ${FRAMEWORK}"
-  [ -n "$DATABASE"  ] && STACK_LINE="${STACK_LINE}\n- **Database**: ${DATABASE}"
-  STACK_LINE="${STACK_LINE}\n- **Package Manager**: ${PKG_MANAGER}"
+  STACK_LINE="- **Language**: $(E "$PROJECT_LANG")"
+  [ -n "$FRAMEWORK" ] && STACK_LINE="${STACK_LINE}${NL}- **Framework**: $(E "$FRAMEWORK")"
+  [ -n "$DATABASE"  ] && STACK_LINE="${STACK_LINE}${NL}- **Database**: $(E "$DATABASE")"
+  STACK_LINE="${STACK_LINE}${NL}- **Package Manager**: $(E "$PKG_MANAGER")"
 
-  sed -i \
-    -e "s|\[Replace with your project name and a one-paragraph description.\]|${PROJECT_NAME} — ${PROJECT_DESCRIPTION}|" \
+  sed_i \
+    -e "s|\[Replace with your project name and a one-paragraph description.\]|$(E "$PROJECT_NAME") — $(E "$PROJECT_DESCRIPTION")|" \
     -e "s|- \*\*Language\*\*: \[e.g. TypeScript / Python / Go\]|${STACK_LINE}|" \
     -e "/- \*\*Framework\*\*: \[e.g. Next.js \/ FastAPI \/ Gin\]/d" \
     -e "/- \*\*Database\*\*: \[e.g. PostgreSQL \/ MongoDB \/ SQLite\]/d" \
     -e "/- \*\*Package Manager\*\*: \[e.g. npm \/ pnpm \/ yarn \/ pip\]/d" \
-    -e "s|\[your install command\]|${CMD_INSTALL}|" \
-    -e "s|\[your dev command\]|${CMD_DEV}|" \
-    -e "s|\[your test command\]|${CMD_TEST}|" \
-    -e "s|\[your build command\]|${CMD_BUILD}|" \
-    -e "s|\[your coverage command\]|${CMD_TEST} --coverage|" \
-    -e "s|\[your targeted test command\]|${CMD_TEST} --testPathPattern=<suite>|" \
-    -e "s|\[your-repo\]|${PROJECT_NAME}|" \
+    -e "s|\[your install command\]|$(E "$CMD_INSTALL")|" \
+    -e "s|\[your dev command\]|$(E "$CMD_DEV")|" \
+    -e "s|\[your test command\]|$(E "$CMD_TEST")|" \
+    -e "s|\[your build command\]|$(E "$CMD_BUILD")|" \
+    -e "s|\[your coverage command\]|$(E "$CMD_TEST") --coverage|" \
+    -e "s|\[your targeted test command\]|$(E "$CMD_TEST") --testPathPattern=<suite>|" \
+    -e "s|\[your-repo\]|$(E "$PROJECT_NAME")|" \
     "CLAUDE.md"
   ok "CLAUDE.md"
 fi
 
 # --- LICENSE ---
 if [ -f "LICENSE" ]; then
-  sed -i \
-    -e "s|\[Year\]|${COPYRIGHT_YEAR}|g" \
-    -e "s|\[Your Name or Organisation\]|${ORG_NAME}|g" \
+  sed_i \
+    -e "s|\[Year\]|$(E "$COPYRIGHT_YEAR")|g" \
+    -e "s|\[Your Name or Organisation\]|$(E "$ORG_NAME")|g" \
     "LICENSE"
   ok "LICENSE"
 fi
 
 # --- SECURITY.md ---
 if [ -f "SECURITY.md" ]; then
-  sed -i "s|security@example\.com|${IT_CONTACT}|g" "SECURITY.md"
+  sed_i "s|security@example\.com|$(E "$IT_CONTACT")|g" "SECURITY.md"
   ok "SECURITY.md"
 fi
 
 # --- Version control provider: CI files and CODEOWNERS ---
 if [ "$PROVIDER" = "github" ]; then
   if [ -f ".github/CODEOWNERS" ]; then
-    sed -i "s|@your-org/team-name|@${VC_TEAM}|g" ".github/CODEOWNERS"
+    sed_i "s|@your-org/team-name|@$(E "$VC_TEAM")|g" ".github/CODEOWNERS"
     ok ".github/CODEOWNERS"
   fi
   if [ -d ".bitbucket" ]; then
@@ -216,7 +229,7 @@ if [ "$PROVIDER" = "github" ]; then
   fi
 elif [ "$PROVIDER" = "bitbucket" ]; then
   if [ -f ".bitbucket/CODEOWNERS" ]; then
-    sed -i "s|@your-workspace/team-name|@${VC_TEAM}|g" ".bitbucket/CODEOWNERS"
+    sed_i "s|@your-workspace/team-name|@$(E "$VC_TEAM")|g" ".bitbucket/CODEOWNERS"
     ok ".bitbucket/CODEOWNERS"
   fi
   [ -f ".bitbucket/pipelines.yml" ] && ok ".bitbucket/pipelines.yml"
@@ -317,16 +330,17 @@ ok "PROJECT_REF.md"
   echo ""
   echo "## Canonical Terms"
   echo ""
-  if [ ${#TERM_DEFS[@]} -eq 0 ]; then
+  if [ ${#TERM_NAMES[@]} -eq 0 ]; then
     echo "_No terms defined yet — add entries here as your domain vocabulary becomes clear._"
     echo ""
     echo "---"
     echo ""
   else
-    for term in "${!TERM_DEFS[@]}"; do
+    for i in "${!TERM_NAMES[@]}"; do
+      term="${TERM_NAMES[$i]}"
       echo "### ${term}"
       echo ""
-      echo "**Definition:** ${TERM_DEFS[$term]}"
+      echo "**Definition:** ${TERM_VALUES[$i]}"
       echo ""
       echo "**Avoid:** TODO — list synonyms or vague phrasings to avoid"
       echo ""
@@ -378,7 +392,7 @@ ok "CONTEXT.md"
   echo ""
   echo "| Thing | Convention | Example |"
   echo "|-------|-----------|---------|"
-  case "$LANG" in
+  case "$PROJECT_LANG" in
     TypeScript*|JavaScript*|typescript*|javascript*)
       echo "| Functions | camelCase verb | \`getUser\`, \`createOrder\` |"
       echo "| Classes / Types | PascalCase | \`UserRecord\`, \`ApiResponse\` |"
@@ -433,19 +447,22 @@ ok "CODING_STANDARDS.md"
 
 # --- docs/ai/domain.md ---
 if [ -f "docs/ai/domain.md" ]; then
-  sed -i "1s|# Agent Domain Guide|# Agent Domain Guide — ${PROJECT_NAME}|" "docs/ai/domain.md"
+  sed_i "1s|# Agent Domain Guide|# Agent Domain Guide — $(E "$PROJECT_NAME")|" "docs/ai/domain.md"
   ok "docs/ai/domain.md"
 fi
 
 # --- .claude/rules/project.md ---
 if [ -f ".claude/rules/project.md" ]; then
-  sed -i "s|\[Project Name\]|${PROJECT_NAME}|g" ".claude/rules/project.md"
+  sed_i "s|\[Project Name\]|$(E "$PROJECT_NAME")|g" ".claude/rules/project.md"
+  [ "$PROJECT_LANG" != "TBD" ] && sed_i "s|\[e\.g\. TypeScript / Python\]|$(E "$PROJECT_LANG")|" ".claude/rules/project.md"
+  [ -n "$FRAMEWORK" ] && sed_i "s|\[e\.g\. Next\.js / FastAPI\]|$(E "$FRAMEWORK")|" ".claude/rules/project.md"
+  [ -n "$PKG_MANAGER" ] && sed_i "s|\[e\.g\. npm / pnpm / pip\]|$(E "$PKG_MANAGER")|" ".claude/rules/project.md"
   ok ".claude/rules/project.md"
 fi
 
 # --- docs/ai/triage-labels.md ---
 if [ -f "docs/ai/triage-labels.md" ]; then
-  sed -i "s|\[Add your areas here\]|Add area labels once feature areas are defined (e.g. area: auth, area: api)|" \
+  sed_i "s|\[Add your areas here\]|Add area labels once feature areas are defined (e.g. area: auth, area: api)|" \
     "docs/ai/triage-labels.md"
   ok "docs/ai/triage-labels.md"
 fi
@@ -454,9 +471,9 @@ fi
 if [ "$PROVIDER" = "bitbucket" ] && [ -f "docs/ai/issue-tracker-bitbucket.md" ]; then
   # Extract workspace from VC_TEAM (e.g. "my-workspace/engineering" -> "my-workspace")
   BB_WORKSPACE="${VC_TEAM%%/*}"
-  sed -i \
-    -e "s|\[bitbucket-workspace\]|${BB_WORKSPACE}|g" \
-    -e "s|\[repo-slug\]|${PROJECT_NAME}|g" \
+  sed_i \
+    -e "s|\[bitbucket-workspace\]|$(E "$BB_WORKSPACE")|g" \
+    -e "s|\[repo-slug\]|$(E "$PROJECT_NAME")|g" \
     "docs/ai/issue-tracker-bitbucket.md"
   cp "docs/ai/issue-tracker-bitbucket.md" "docs/ai/issue-tracker.md"
   rm "docs/ai/issue-tracker-bitbucket.md"
@@ -557,14 +574,11 @@ echo "  docs/ai/triage-labels.md — run 'gh label list' and confirm label strin
 echo ""
 
 # ─── ralph-loop plugin note ───────────────────────────────────────────────────
-RALPH_PLUGIN_DIR="$HOME/.claude/plugins/ralph-loop"
-RALPH_HOOKS="$RALPH_PLUGIN_DIR/hooks/hooks.json"
-
-if [ -f "$RALPH_HOOKS" ]; then
+if command -v claude >/dev/null 2>&1 && claude plugin list 2>/dev/null | grep -q "ralph"; then
   : # plugin installed, no action needed on Mac/Linux
-elif [ ! -d "$RALPH_PLUGIN_DIR" ]; then
+else
   echo "Optional: install the ralph-loop plugin for autonomous iteration loops."
-  echo "  In Claude Code run: /install-plugin ralph-loop"
+  echo "  Run: claude plugin install ralph-loop   (or /plugin inside Claude Code)"
   echo "  Then see /ralph for usage and prompt templates."
   echo ""
 fi

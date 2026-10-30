@@ -1,4 +1,4 @@
-﻿# CONTEXT.md — Domain Glossary
+# CONTEXT.md — Domain Glossary
 
 > This file is the canonical vocabulary for this project.
 > Claude reads it via `/prime`. Use it to resolve ambiguity before writing code, docs, or agent prompts.

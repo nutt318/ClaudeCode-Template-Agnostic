@@ -1,0 +1,34 @@
+{
+  "recommendations": [
+    // Core
+    "anthropics.claude-code",
+    "EditorConfig.EditorConfig",
+    "esbenp.prettier-vscode",
+
+    // Quality of life
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    "davidanson.vscode-markdownlint",
+
+    // Git and GitHub
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+
+    // Build
+    "ms-vscode.makefile-tools",
+
+    // JavaScript / TypeScript
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+
+    // Python
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+
+    // Go
+    "golang.go",
+
+    // Rust
+    "rust-lang.rust-analyzer"
+  ]
+}

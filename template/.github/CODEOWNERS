@@ -1,0 +1,28 @@
+# CODEOWNERS
+# Defines who is automatically requested to review PRs touching specific paths.
+# GitHub enforces this — listed owners must approve before merge (if branch protection is on).
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything not matched below
+* @your-org/team-name
+
+# Claude and AI config — reviewed by whoever owns the AI tooling
+CLAUDE.md @your-org/team-name
+PROJECT_REF.md @your-org/team-name
+.claude/ @your-org/team-name
+.mcp.json @your-org/team-name
+
+# GitHub Actions and CI — reviewed by whoever owns DevOps
+.github/ @your-org/devops
+
+# Security-sensitive files
+.env.example @your-org/team-lead
+**/auth/** @your-org/team-lead
+**/security/** @your-org/team-lead
+
+# Documentation
+docs/ @your-org/team-name
+*.md @your-org/team-name
+
+# Source code — replace with your actual structure
+src/ @your-org/team-name

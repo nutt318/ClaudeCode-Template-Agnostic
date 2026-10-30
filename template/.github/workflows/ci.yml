@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # ── Node.js ────────────────────────────────────────────────────────────────
+  # Remove this job if your project is not Node/TypeScript/JavaScript
+  node:
+    name: Node.js — lint, test, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: src/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+        # Remove if project has no TypeScript
+
+      - name: Test
+        run: npm test -- --coverage
+
+      - name: Build
+        run: npm run build
+
+  # ── Python ─────────────────────────────────────────────────────────────────
+  # Uncomment this job if your project is Python
+  # python:
+  #   name: Python — lint, test
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: src
+  #
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.12"
+  #         cache: pip
+  #
+  #     - name: Install dependencies
+  #       run: pip install -r requirements.txt
+  #
+  #     - name: Lint
+  #       run: ruff check .
+  #
+  #     - name: Type check
+  #       run: mypy .
+  #
+  #     - name: Test
+  #       run: pytest --cov --cov-report=term-missing
+
+  # ── Go ─────────────────────────────────────────────────────────────────────
+  # Uncomment this job if your project is Go
+  # go:
+  #   name: Go — vet, test, build
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: src
+  #
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version-file: src/go.mod
+  #
+  #     - name: Vet
+  #       run: go vet ./...
+  #
+  #     - name: Test
+  #       run: go test ./... -race -coverprofile=coverage.out
+  #
+  #     - name: Build
+  #       run: go build ./...

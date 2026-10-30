@@ -1,4 +1,4 @@
-﻿# PROJECT_REF.md
+# PROJECT_REF.md
 
 Factual, evolving knowledge about this codebase.
 This is distinct from CLAUDE.md (which contains instructions and principles).

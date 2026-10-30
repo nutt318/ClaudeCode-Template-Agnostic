@@ -1,4 +1,4 @@
-# ClaudeCode-Template — Maintainer Guide
+# ClaudeCode-Template-Agnostic — Maintainer Guide
 
 This repo is the **source** for a per-project Claude Code scaffold. It is not itself a project
 you run — it's the thing you copy *into* projects. This README is for whoever **maintains and
@@ -6,7 +6,7 @@ hands out** the template. People receiving the template don't need this file (se
 [Distribution model](#distribution-model)).
 
 ```
-ClaudeCode-Template/
+ClaudeCode-Template-Agnostic/
 ├── README.md      <- you are here — maintainer guide (not shipped to consumers)
 ├── CLAUDE.md      <- how to work on this repo (Claude reads this; humans should too)
 └── template/      <- the scaffold — THIS is what gets handed out
@@ -38,7 +38,7 @@ pushing the workspace — is still available; see the `.gitignore` notes.)
 
 ```
 ~/Projects/
-├── ClaudeCode-Template/     <- this repo — reference copy, update occasionally
+├── ClaudeCode-Template-Agnostic/     <- this repo — reference copy, update occasionally
 └── your-project/            <- ONE git repo → github.com/org/your-app
     ├── .git/
     ├── CLAUDE.md            <- tracked
@@ -53,13 +53,13 @@ then committing/pushing from the project root:
 ```bash
 # New project from scratch (one combined repo)
 mkdir ~/Projects/your-project && cd ~/Projects/your-project
-cp -r path/to/ClaudeCode-Template/template/. .
+cp -r path/to/ClaudeCode-Template-Agnostic/template/. .
 mkdir src                                                  # your code goes here
 claude                                                     # then run /prime
 
 # Existing repo — clone into src/ and fold it into the one combined repo
 mkdir ~/Projects/your-project && cd ~/Projects/your-project
-cp -r path/to/ClaudeCode-Template/template/. .
+cp -r path/to/ClaudeCode-Template-Agnostic/template/. .
 git clone https://github.com/org/your-repo src && rm -rf src/.git   # drop inner .git to track it here
 claude                                                     # then run /prime
 # (To keep src/ as its own separate repo, skip the rm and use Option A — see .gitignore.)
@@ -97,6 +97,9 @@ anything. The essentials:
 - **`setup.sh` and `setup.ps1` must stay functionally identical.** Every placeholder one fills, the
   other must fill the same way. They live in `template/scripts/`. This is the easiest thing to get
   wrong: change one, change both.
+- **`setup.sh` must work on macOS.** It runs under the stock bash 3.2 and BSD `sed`, so avoid GNU-only
+  constructs: use the `sed_i` helper instead of `sed -i`, no `${var,,}` or `declare -A`, and use `$NL`
+  instead of `\n` in sed replacements. Prompts captured with `$(...)` must write to stderr.
 - **Placeholders use `[your-thing]` format** so `sed` (bash) and `-replace` (PowerShell) can target
   them cleanly. Keep the bracket convention for anything the scripts substitute.
 - **The `_disabled_` prefix in `.mcp.json` is the disable convention** — rename to enable, never
@@ -120,7 +123,7 @@ Confirm both providers (GitHub / Bitbucket / skip), check that placeholders are 
 `START-HERE.md` is removed at the end. Run the **other** script too — both must produce equivalent
 output.
 
-> The `template/` subdirectory is not a git repository (git lives at the `ClaudeCode-Template/`
+> The `template/` subdirectory is not a git repository (git lives at the `ClaudeCode-Template-Agnostic/`
 > root). Running `/prime` from inside `template/` skips the git steps — that is expected.
 
 ---
@@ -140,12 +143,13 @@ template/
 ├── Makefile / .editorconfig / .env.example / .gitignore
 │
 ├── src/                               <- application code lives here
-├── outputs/                           <- Claude-generated deliverables (git-ignored)
+├── outputs/                           <- Claude-generated deliverables (git-ignore optional; see its README)
 ├── reference/                         <- patterns/specs Claude treats as source of truth
 │
 ├── docs/
 │   ├── onboarding-checklist.md        <- day-one checklist (consumer entry for joiners)
 │   ├── lessons.md / shell-aliases.md
+│   ├── ecc-recommended.md             <- optional ECC install: pinned version + curated skill list
 │   ├── ai/                            <- domain.md, issue-tracker.md, triage-labels.md
 │   ├── not-doing/                     <- rejected features (prevents re-litigation)
 │   ├── plans/                         <- implementation plans from /create-plan
@@ -211,13 +215,16 @@ specific.
 ### Autonomous loops (ralph-loop) — Windows gotcha worth knowing
 
 The optional [ralph-loop plugin](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/ralph-loop)
-(`/install-plugin ralph-loop`) drives `/ralph`. Its Stop hook runs a bash script, and on Windows
+(`claude plugin install ralph-loop`, or `/plugin` inside Claude Code) drives `/ralph`. Its Stop hook runs a bash script, and on Windows
 `bash` may resolve to WSL instead of Git Bash, breaking the hook (the loop exits immediately instead
 of iterating). The fix is to point the hook at the full Git Bash path in the plugin's hashed cache:
 
 ```
-%USERPROFILE%\.claude\plugins\cache\claude-plugins-official\ralph-wiggum\<hash>\hooks\hooks.json
+%USERPROFILE%\.claude\plugins\cache\<marketplace>\ralph-*\<hash>\hooks\hooks.json
 ```
+
+(The plugin folder has been published as both `ralph-loop` and `ralph-wiggum`, so use the `ralph-*`
+wildcard.)
 
 ```json
 "command": "\"C:/Program Files/Git/bin/bash.exe\" ${CLAUDE_PLUGIN_ROOT}/hooks/stop-hook.sh"
@@ -226,24 +233,21 @@ of iterating). The fix is to point the hook at the full Git Bash path in the plu
 > Use `Git/bin/bash.exe`, **not** `Git/usr/bin/bash.exe` — the `bin/` wrapper sets up the full PATH;
 > the `usr/bin/` binary lacks the utilities the hook needs.
 
-`setup.ps1` detects this cache path automatically and warns if the fix is needed.
+`setup.ps1` detects this cache path automatically (any `ralph-*` folder) and warns if the fix is needed.
 
 ---
 
 ## Optional: ECC (everything-claude-code)
 
 [ECC](https://github.com/affaan-m/everything-claude-code) is a global toolkit that adds extra
-agents, skills, hooks, and commands to every Claude Code session on a machine. It is **not required**
-— the template works fully standalone. Consumers can install it via `/prime` (it offers the step) or
-manually:
+skills, agents, and commands to every Claude Code session on a machine. It is **not required** —
+the template works fully standalone.
 
-```bash
-git clone https://github.com/affaan-m/everything-claude-code.git ~/Projects/everything-claude-code
-cd ~/Projects/everything-claude-code && ./install.sh   # or .\install.ps1 on Windows
-```
-
-Most users want `ECC_HOOK_PROFILE=standard` (the default is `strict`). Pull updates and re-run the
-installer periodically.
+Don't install all of it: the full library is ~290 skills that overlap and cost context every
+session. `template/docs/ecc-recommended.md` is the maintained list — a pinned ECC version, a
+minimal baseline, core extras, and a per-stack table. `/prime` walks consumers through it on first
+run. When you bump the ECC version or change the skill list, edit that one file (and re-check the
+skill names against the new release).
 
 ---
 

@@ -1,0 +1,64 @@
+{
+  "mcpServers": {
+
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      },
+      "description": "GitHub operations — PRs, issues, repos, code search. Requires GITHUB_TOKEN env var (a GitHub PAT). For OAuth or local Docker alternatives see github.com/github/github-mcp-server."
+    },
+
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem@2.1.0", "."],
+      "description": "Local file system access — scoped to project root. No auth required."
+    },
+
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@4.4.4"],
+      "description": "Live library documentation lookup. Add 'use context7' to your prompt to fetch current API docs. No auth required."
+    },
+
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@2.0.0"],
+      "description": "Structured chain-of-thought reasoning for complex planning and architectural decisions. No auth required."
+    },
+
+    "_disabled_postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres@0.6.2"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL}"
+      },
+      "description": "DISABLED — rename to 'postgres' to enable. PostgreSQL read access. NOTE: this npm package is deprecated/unsupported upstream; consider a maintained Postgres MCP server. Requires DATABASE_URL env var."
+    },
+
+    "_disabled_jira": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-atlassian"],
+      "env": {
+        "JIRA_URL": "${JIRA_URL}",
+        "JIRA_EMAIL": "${JIRA_EMAIL}",
+        "JIRA_API_TOKEN": "${JIRA_API_TOKEN}"
+      },
+      "description": "DISABLED — rename to 'jira' to enable. Read/create/update Jira issues. Requires JIRA_URL, JIRA_EMAIL, JIRA_API_TOKEN env vars. Install uvx: pip install uv"
+    },
+
+    "_disabled_playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@0.0.83"],
+      "description": "DISABLED — rename to 'playwright' to enable. Browser automation for E2E testing — pairs with /e2e command. No auth required."
+    }
+
+  }
+}

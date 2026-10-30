@@ -1,4 +1,4 @@
-﻿# src/
+# src/
 
 All application code lives here.
 

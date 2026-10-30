@@ -1,0 +1,57 @@
+# Bitbucket Pipelines — CI for this project
+# Docs: https://support.atlassian.com/bitbucket-cloud/docs/get-started-with-bitbucket-pipelines/
+#
+# All steps run commands from the src/ directory.
+# The Node.js step is active by default. Swap *node-ci for *python-ci or *go-ci
+# in the pipelines section below to match your stack, then delete the others.
+
+definitions:
+  steps:
+
+    # ── Node.js ────────────────────────────────────────────────────────────────
+    - step: &node-ci
+        name: Node.js — lint, test, build
+        image: node:20
+        caches:
+          - node
+        script:
+          - cd src
+          - npm ci
+          - npm run lint
+          - npm run typecheck
+          - npm test -- --coverage
+          - npm run build
+
+    # ── Python ─────────────────────────────────────────────────────────────────
+    # - step: &python-ci
+    #     name: Python — lint, test
+    #     image: python:3.12
+    #     caches:
+    #       - pip
+    #     script:
+    #       - cd src
+    #       - pip install -r requirements.txt
+    #       - ruff check .
+    #       - mypy .
+    #       - pytest --cov --cov-report=term-missing
+
+    # ── Go ─────────────────────────────────────────────────────────────────────
+    # - step: &go-ci
+    #     name: Go — vet, test, build
+    #     image: golang:1.22
+    #     script:
+    #       - cd src
+    #       - go vet ./...
+    #       - go test ./... -race -coverprofile=coverage.out
+    #       - go build ./...
+
+pipelines:
+  pull-requests:
+    '**':
+      - step: *node-ci   # swap for *python-ci or *go-ci to match your stack
+
+  branches:
+    main:
+      - step: *node-ci
+    develop:
+      - step: *node-ci

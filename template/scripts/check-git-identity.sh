@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 # Pre-commit hook: block commits if git identity is not configured.
 # Install: cp scripts/check-git-identity.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 # Or run: make install  (does this automatically)

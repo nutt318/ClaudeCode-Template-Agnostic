@@ -1,4 +1,4 @@
-﻿# Coding Standards
+# Coding Standards
 
 > Reference this file in agent prompts with @CODING_STANDARDS.md
 > to ensure standards are applied regardless of global rule installation.
