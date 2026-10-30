@@ -15,44 +15,40 @@ ECC ships ~290 skills. Every installed skill's name and description is loaded in
 start of each session, so a full install costs context on every task, and many skills overlap or
 target niche domains. Install a baseline, add what your stack needs, and skip the rest.
 
-## 1. Install the baseline
+## 1. Get ECC at the pinned version
 
-Clone ECC at the pinned tag, outside any project, and install the `minimal` profile (rules, agents,
-commands, and ~47 workflow skills — **no hooks**):
+Clone it outside any project. This only downloads files; nothing is installed into `~/.claude` yet.
 
 ```bash
 # Mac/Linux
 git clone --branch v2.2.3 https://github.com/affaan-m/everything-claude-code.git ~/Projects/everything-claude-code
-cd ~/Projects/everything-claude-code
-./install.sh --profile minimal --target claude --dry-run   # preview what will be written
-./install.sh --profile minimal --target claude
 ```
 
 ```powershell
 # Windows
 git clone --branch v2.2.3 https://github.com/affaan-m/everything-claude-code.git "$env:USERPROFILE\Projects\everything-claude-code"
-cd "$env:USERPROFILE\Projects\everything-claude-code"
-.\install.ps1 --profile minimal --target claude --dry-run
-.\install.ps1 --profile minimal --target claude
 ```
 
-Skills must end up directly under `~/.claude/skills/<skill-name>/SKILL.md` for Claude Code to find
-them. A nested `skills/ecc/<name>/` layout (from older ECC installs) is not discovered — re-running
-the installer migrates it.
+> **Don't use the installer for the baseline.** In v2.2.3, `./install.sh --profile minimal` writes
+> ~400 files: rules for *every* language (loaded into every session), 68 agents, 94 commands, and
+> loose files in the root of `~/.claude`. `--skills <list>` is worse (~540 files) because it pulls in
+> each skill's dependent modules. Copy only the skills you want instead — ECC's README documents this
+> as a supported path ("Choose only the components you need").
 
-### Already in the baseline
+## 2. Copy the baseline and core skills
 
-`tdd-workflow`, `verification-loop`, `e2e-testing`, `strategic-compact`, `git-workflow`,
-`architecture-decision-records`, `error-handling`, `skill-stocktake`, `skill-scout`,
-`config-gc`, `context-budget`, `codebase-onboarding`, plus others. Skip `continuous-learning`
-(deprecated — `continuous-learning-v2` replaces it).
-
-## 2. Add the core extras
-
-These are useful on almost any project and are **not** in the baseline:
+These 20 skills are useful on almost any project. Claude Code only discovers skills that are direct
+children of `~/.claude/skills/`, so copy each skill folder there (do not nest them under `ecc/`).
 
 | Skill | Use it for |
 |-------|-----------|
+| `tdd-workflow` | Failing test first, then implement, then refactor |
+| `verification-loop` | Build, type check, lint, tests, security grep, diff review |
+| `e2e-testing` | Playwright E2E patterns |
+| `strategic-compact` | Compacting context at logical points |
+| `git-workflow` | Branching and commit conventions |
+| `architecture-decision-records` | Recording design decisions |
+| `error-handling` | Typed errors and boundaries |
 | `security-review` | Auth, input handling, secrets, API endpoints |
 | `coding-standards` | Cross-project naming/readability baseline |
 | `api-design` | REST resource naming, status codes, pagination, versioning |
@@ -61,22 +57,44 @@ These are useful on almost any project and are **not** in the baseline:
 | `docker-patterns` | Containers, Compose, container security |
 | `search-first` | Look for existing libraries before writing custom code |
 | `documentation-lookup` | Current library docs via the Context7 MCP (enabled in `.mcp.json`) |
+| `codebase-onboarding` | Getting oriented in an unfamiliar codebase |
+| `context-budget` | Seeing where context is being spent |
+| `skill-stocktake`, `skill-scout`, `config-gc` | Auditing skills and config for overlap and staleness |
 
 ```bash
-./install.sh --target claude --skills security-review,coding-standards,api-design,database-migrations,deployment-patterns,docker-patterns,search-first,documentation-lookup
+# Mac/Linux (run in bash or zsh)
+cd ~/Projects/everything-claude-code
+mkdir -p ~/.claude/skills
+for s in tdd-workflow verification-loop e2e-testing strategic-compact git-workflow \
+         architecture-decision-records error-handling security-review coding-standards api-design \
+         database-migrations deployment-patterns docker-patterns search-first documentation-lookup \
+         codebase-onboarding context-budget skill-stocktake skill-scout config-gc; do
+  [ -e ~/.claude/skills/$s ] && echo "skip (exists): $s" || cp -R skills/$s ~/.claude/skills/
+done
 ```
 
 ```powershell
-.\install.ps1 --target claude --skills security-review,coding-standards,api-design,database-migrations,deployment-patterns,docker-patterns,search-first,documentation-lookup
+# Windows
+cd "$env:USERPROFILE\Projects\everything-claude-code"
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\skills" | Out-Null
+$skills = "tdd-workflow","verification-loop","e2e-testing","strategic-compact","git-workflow",
+          "architecture-decision-records","error-handling","security-review","coding-standards","api-design",
+          "database-migrations","deployment-patterns","docker-patterns","search-first","documentation-lookup",
+          "codebase-onboarding","context-budget","skill-stocktake","skill-scout","config-gc"
+foreach ($s in $skills) {
+  $dest = "$env:USERPROFILE\.claude\skills\$s"
+  if (Test-Path $dest) { "skip (exists): $s" } else { Copy-Item "skills\$s" $dest -Recurse }
+}
 ```
 
-Run with `--dry-run` first if you want to see the file plan.
+Restart Claude Code afterwards. Skip `continuous-learning` (deprecated — `continuous-learning-v2`
+replaces it).
 
 ## 3. Add only your stack
 
-Pick the rows that match the project. Each language/framework has layered skills — a baseline
-(`tdd-workflow`, `verification-loop`) plus stack-specific ones. Install the stack ones only for
-stacks you actually use.
+Pick the rows that match the project. Each language/framework has layered skills — the baseline from
+step 2 plus stack-specific ones. Copy the stack ones the same way as in step 2, and only for stacks
+you actually use.
 
 | Stack | Skills |
 |-------|--------|
@@ -99,9 +117,9 @@ stacks you actually use.
 | Kubernetes | `kubernetes-patterns` |
 | Building MCP servers | `mcp-server-patterns` |
 
-Language **rules** (coding style, testing, security) install separately from skills. Start with
-`rules/common` plus the one language you use, copied into `~/.claude/rules/ecc/` — see ECC's README
-("Choose only the components you need").
+Language **rules** (coding style, testing, security) are separate from skills and are loaded into every
+session, so install them for one language at a time: copy `rules/common` plus that language's folder
+into `~/.claude/rules/ecc/` (see ECC's README, "Choose only the components you need").
 
 ## 4. Skip these
 
@@ -147,5 +165,5 @@ template, the template's versions run.
 ## Keeping it current
 
 Check ECC's releases every few months. To upgrade, `git fetch --tags`, check out the new tag,
-review the changelog, and re-run the commands above. After upgrading, run the `skill-stocktake` skill to
+review the changelog, delete the skill folders you want refreshed from `~/.claude/skills/`, and re-run the copy commands above (they skip folders that already exist). After upgrading, run the `skill-stocktake` skill to
 audit for overlap and the `config-gc` skill to find stale config.

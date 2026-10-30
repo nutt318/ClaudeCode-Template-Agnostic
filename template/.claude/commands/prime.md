@@ -129,12 +129,12 @@ Check whether everything-claude-code (ECC) is installed by looking for `~/.claud
 - If **either exists**: confirm "everything-claude-code detected — looks good." and continue.
 - If **neither exists**: say:
 
-  > "I don't see everything-claude-code (ECC) installed. ECC adds extra skills, agents, and commands to every Claude Code session on your machine — it's optional, but it enhances what this template can do. I'd install a small recommended set, not the whole library. Want me to walk you through it? (yes / skip for now)"
+  > "I don't see everything-claude-code (ECC) installed. ECC adds extra skills, agents, and commands to every Claude Code session on your machine — it's optional, but it enhances what this template can do. I'd add a small recommended set of skills, not the whole library. Want me to walk you through it? (yes / skip for now)"
 
   If **yes**: read `docs/ecc-recommended.md` and walk the user through it. Follow that file for the exact commands, pinned version and skill list — do not improvise installer flags from memory. In short:
 
-  1. Clone ECC at the pinned tag to a stable location outside any project, and preview the install with `--dry-run`.
-  2. Install the `minimal` profile (no hooks), then the core extras listed in the doc.
+  1. Clone ECC at the pinned tag to a stable location outside any project.
+  2. Copy the baseline and core skills listed in the doc into `~/.claude/skills/` (the doc has the exact commands). **Do not run ECC's installer for this** — its `minimal` profile writes ~400 files, including rules for every language that load into every session.
   3. Ask which stack(s) this project uses and add only the matching skills from the doc's stack table.
   4. Hooks are off by default. Mention they exist and are covered in the doc; do not enable them unless the user asks.
   5. Confirm: "ECC installed. Restart Claude Code to pick up the new skills, agents, and commands."
